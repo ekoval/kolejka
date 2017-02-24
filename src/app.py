@@ -59,5 +59,13 @@ def delete_zone(id):
     Zone.objects.get(pk=id).delete()
 
 
+@app.route('/v1/tracking-data/<tracking_id>', methods=['GET'])
+@api_response()
+def get_tracking_data(tracking_id):
+    data = Tracking.objects.filter(
+        tracking_id=tracking_id).order_by('tracking_timestamp')
+    return [point.as_dict() for point in data]
+
+
 if __name__ == '__main__':
     app.run(debug=True)
