@@ -1,2 +1,0 @@
-# kolejka
-Kolajka Kurwa Mach
