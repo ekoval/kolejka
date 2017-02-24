@@ -1,4 +1,5 @@
-from mongoengine import Document, StringField, FloatField, IntField, DateTimeField
+from mongoengine import (
+    Document, StringField, FloatField, IntField, DateTimeField, BooleanField)
 from datetime import datetime
 
 
@@ -24,3 +25,18 @@ class Tracking(Document):
             'lon': self.lon,
             'lat': self.lat
         }
+
+
+class Zone(Document):
+    name = StringField(required=True)
+    description = StringField()
+    image = StringField()
+    lat = FloatField(required=True)
+    lon = FloatField(required=True)
+    radius = IntField(required=True)
+    enabled = BooleanField(default=True)
+
+    def as_dict(self):
+        data = self.to_mongo()
+        data['id'] = str(data.pop('_id'))
+        return data
