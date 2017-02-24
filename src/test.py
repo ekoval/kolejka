@@ -1,7 +1,9 @@
 import json
+import time
 import unittest
 from mongoengine.connection import _get_db
 from app import app
+from models import Tracking
 
 
 class KolejkaTest(unittest.TestCase):
@@ -220,3 +222,53 @@ class KolejkaTest(unittest.TestCase):
         res = self.app.get('/v1/zones')
         body = json.loads(res.data)
         self.assertEquals(body['data'], [])
+
+
+class TestGetTrackingDataForTrackingID(unittest.TestCase):
+    def setUp(self):
+        app.debug = True
+        self.app = app.test_client()
+        _get_db().tracking.remove()
+        _get_db().zone.remove()
+
+        tracking_time = time.time()
+
+        self.points = [
+            Tracking.objects.create(
+                tracking_id='phone1',
+                lat=10.1,
+                lon=10.2,
+                tracking_timestamp=tracking_time
+            ),
+
+            Tracking.objects.create(
+                tracking_id='phone1',
+                lat=10.3,
+                lon=10.4,
+                tracking_timestamp=tracking_time+1
+            ),
+
+            Tracking.objects.create(
+                tracking_id='phone2',
+                lat=10.5,
+                lon=10.6,
+                tracking_timestamp=tracking_time+2
+            )
+        ]
+
+        self.results = json.loads(
+            self.app.get('/v1/tracking-data/phone1').data)
+
+    def test_returns_correct_data(self):
+        self.assertEqual(self.results['status'], 'success')
+        data = self.results['data']
+        self.assertEqual(len(data), 2)
+
+        # TODO: improve tests. Now we have mess with `created_at`, so it's
+        # hard to check data comprehensively.
+        for point in data:
+            self.assertEqual(point['tracking_id'], 'phone1')
+            for key in (
+                    'tracking_id', 'lat', 'lon',
+                    'created_at', 'tracking_timestamp'):
+                self.assertIn(key, point)
