@@ -1,9 +1,12 @@
 import json
 import time
 import unittest
+from mongoengine.fields import ObjectId
 from mongoengine.connection import _get_db
 from app import app
 from models import Tracking
+
+from constants import DataTypes
 
 
 class KolejkaTest(unittest.TestCase):
@@ -42,7 +45,7 @@ class KolejkaTest(unittest.TestCase):
         self.assertEquals(body['status'], 'error')
         self.assertEquals(
             body['data'],
-            "Missing keys: 'lat', 'lon', 'tracking_id', 'tracking_timestamp'"
+            "Missing keys: 'data_type', 'lat', 'lon', 'tracking_id', 'tracking_timestamp', 'zone_id'"
         )
 
     def test_tracking_field_validation(self):
@@ -91,6 +94,8 @@ class KolejkaTest(unittest.TestCase):
 
     def test_tracking_post(self):
         payload = {
+            'zone_id': str(ObjectId()),
+            'data_type': DataTypes.enter,
             'tracking_id': 'track_id',
             'tracking_timestamp': 100000,
             'lat': 10.0,
@@ -112,12 +117,16 @@ class KolejkaTest(unittest.TestCase):
             'data': [
                 {
                     'tracking_id': 'track_id',
+                    'data_type': DataTypes.enter,
+                    'zone_id': str(ObjectId()),
                     'tracking_timestamp': 100000,
                     'lat': 10.0,
                     'lon': 20.0
                 },
                 {
                     'tracking_id': 'track_id',
+                    'data_type': DataTypes.leave,
+                    'zone_id': str(ObjectId()),
                     'tracking_timestamp': 100001,
                     'lat': 10.5,
                     'lon': 20.5
@@ -207,21 +216,21 @@ class KolejkaTest(unittest.TestCase):
 
         self.assertEquals(len(body['data']), 1)
 
-        self.assertEquals(body['data'][0]['name'], 'Grushiv')
-        self.assertEquals(body['data'][0]['description'], 'Kolejka inodi')
-        self.assertEquals(body['data'][0]['image'], '')
-        self.assertEquals(body['data'][0]['lat'], 10.5)
-        self.assertEquals(body['data'][0]['lon'], 20)
-        self.assertEquals(body['data'][0]['radius'], 3000)
+        zone = body['data'][0]
+        self.assertEquals(zone['name'], 'Grushiv')
+        self.assertEquals(zone['description'], 'Kolejka inodi')
+        self.assertEquals(zone['image'], '')
+        self.assertEquals(zone['lat'], 10.5)
+        self.assertEquals(zone['lon'], 20)
+        self.assertEquals(zone['radius'], 3000)
+        self.assertIn('created_at', zone)
 
-        zone_id = body['data'][0]['id']
-
-        res = self.app.delete('/v1/zones/{id}'.format(id=zone_id))
+        res = self.app.delete('/v1/zones/{id}'.format(id=zone['id']))
         self.assertEquals(res.status_code, 200)
 
         res = self.app.get('/v1/zones')
         body = json.loads(res.data)
-        self.assertEquals(body['data'], [])
+        self.assertEquals(body['data'][0]['enabled'], False)
 
 
 class TestGetTrackingDataForTrackingID(unittest.TestCase):
@@ -236,6 +245,8 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
         self.points = [
             Tracking.objects.create(
                 tracking_id='phone1',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
                 lat=10.1,
                 lon=10.2,
                 tracking_timestamp=tracking_time
@@ -243,6 +254,8 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
 
             Tracking.objects.create(
                 tracking_id='phone1',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
                 lat=10.3,
                 lon=10.4,
                 tracking_timestamp=tracking_time+1
@@ -250,6 +263,8 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
 
             Tracking.objects.create(
                 tracking_id='phone2',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
                 lat=10.5,
                 lon=10.6,
                 tracking_timestamp=tracking_time+2

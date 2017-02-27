@@ -56,7 +56,9 @@ def post_zone(data):
 @app.route('/v1/zones/<id>', methods=['DELETE'])
 @api_response()
 def delete_zone(id):
-    Zone.objects.get(pk=id).delete()
+    zone = Zone.objects.get(pk=id)
+    zone.enabled = False
+    zone.save()
 
 
 @app.route('/v1/tracking-data/<tracking_id>', methods=['GET'])
