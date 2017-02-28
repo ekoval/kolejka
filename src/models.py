@@ -1,10 +1,15 @@
 from mongoengine import (
-    Document, StringField, FloatField, IntField, DateTimeField, BooleanField)
+    Document, ObjectIdField, StringField, FloatField, IntField, DateTimeField,
+    BooleanField)
 from datetime import datetime
+
+from constants import DATA_TYPES
 
 
 class Tracking(Document):
     tracking_id = StringField(required=True)
+    data_type = StringField(max_length=5, choices=DATA_TYPES, required=True)
+    zone_id = ObjectIdField(required=True)
     lat = FloatField(required=True)
     lon = FloatField(required=True)
     tracking_timestamp = IntField(required=True)
@@ -20,6 +25,8 @@ class Tracking(Document):
         return {
             'id': str(self.id),
             'tracking_id': self.tracking_id,
+            'data_type': self.data_type,
+            'zone_id': str(self.zone_id),
             'tracking_timestamp': self.tracking_timestamp,
             'created_at': self.created_at,
             'lon': self.lon,
@@ -35,6 +42,7 @@ class Zone(Document):
     lon = FloatField(required=True)
     radius = IntField(required=True)
     enabled = BooleanField(default=True)
+    created_at = DateTimeField(default=datetime.now)
 
     def as_dict(self):
         data = self.to_mongo()
