@@ -1,0 +1,6 @@
+.gitignore
+*.pyc
+*.~*
+*.*~
+var
+.venv

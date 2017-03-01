@@ -92,6 +92,37 @@ class KolejkaTest(unittest.TestCase):
         self.assertEquals(body['status'], 'error')
         self.assertEquals(body['data'], "lon should be either int or float")
 
+        payload = {
+            'tracking_id': '123',
+            'tracking_timestamp': 100000,
+            'lat': 0.0,
+            'lon': 0.0,
+            'zone_id': ''
+        }
+        res = self.app.post('/v1/tracking',
+                            data=json.dumps(payload),
+                            content_type='application/json')
+        body = json.loads(res.data)
+        self.assertEquals(res.status_code, 400)
+        self.assertEquals(body['status'], 'error')
+        self.assertEquals(body['data'], "zone_id should be non-empty string")
+
+        payload = {
+            'tracking_id': '123',
+            'tracking_timestamp': 100000,
+            'lat': 0.0,
+            'lon': 0.0,
+            'zone_id': 'zone-id',
+            'data_type': 'wrong'
+        }
+        res = self.app.post('/v1/tracking',
+                            data=json.dumps(payload),
+                            content_type='application/json')
+        body = json.loads(res.data)
+        self.assertEquals(res.status_code, 400)
+        self.assertEquals(body['status'], 'error')
+        self.assertEquals(body['data'], "data_type should be one of enter, leave, track")
+
     def test_tracking_post(self):
         payload = {
             'zone_id': str(ObjectId()),
