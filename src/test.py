@@ -1,10 +1,11 @@
 import json
 import time
 import unittest
+
 from mongoengine.fields import ObjectId
 from mongoengine.connection import _get_db
 from app import app
-from models import Tracking
+from models import Tracking, Zone
 
 from constants import DataTypes
 
@@ -287,3 +288,42 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
                     'tracking_id', 'lat', 'lon',
                     'created_at', 'tracking_timestamp'):
                 self.assertIn(key, point)
+
+
+class SetPairZoneOk(unittest.TestCase):
+    def setUp(self):
+        self.zone1 = Zone.objects.create(
+            name='zone1', lat=10.1, lon=10.1, radius=10)
+        self.zone2 = Zone.objects.create(
+            name='zone1', lat=10.1, lon=10.1, radius=10)
+        self.assertEqual(self.zone1.pair_zone_id, None)
+        self.assertEqual(self.zone2.pair_zone_id, None)
+        self.app = app.test_client()
+        self.response = self.app.post(
+            '/v1/zones/{}/set-pair-zone'.format(self.zone1.id),
+            data=json.dumps({'pair_zone_id': str(self.zone2.id)}),
+            content_type='application/json')
+
+    def test_correct_response_is_returned(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(
+            self.response.data, 'Pair set: {} <-> {}'.format(
+                self.zone1.id, self.zone2.id))
+
+    def test_pair_zone_is_set(self):
+        zone1 = Zone.objects.get(id=self.zone1.id)
+        zone2 = Zone.objects.get(id=self.zone2.id)
+        self.assertEqual(zone1.pair_zone_id, zone2.id)
+        self.assertEqual(zone2.pair_zone_id, zone1.id)
+
+
+class SetPairZoneIfZoneNotFound(unittest.TestCase):
+    def setUp(self):
+        client = app.test_client()
+        self.response = client.post(
+            '/v1/zones/{}/set-pair-zone'.format(str(ObjectId())),
+            data=json.dumps({'pair_zone_id': str(ObjectId())}),
+            content_type='application/json')
+
+    def test_404_ok_is_returned(self):
+        self.assertEqual(self.response.status_code, 404)
