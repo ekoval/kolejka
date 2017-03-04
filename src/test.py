@@ -242,6 +242,7 @@ class KolejkaTest(unittest.TestCase):
         self.assertEquals(body['data']['lat'], 10.5)
         self.assertEquals(body['data']['lon'], 20)
         self.assertEquals(body['data']['radius'], 3000)
+        self.assertIsNone(body['data']['pair_zone_id'])
 
         res = self.app.get('/v1/zones')
         body = json.loads(res.data)

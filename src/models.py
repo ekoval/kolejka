@@ -48,4 +48,7 @@ class Zone(Document):
     def as_dict(self):
         data = self.to_mongo()
         data['id'] = str(data.pop('_id'))
+        data['pair_zone_id'] = (
+            None if self.pair_zone_id is None else str(self.pair_zone_id))
+
         return data
