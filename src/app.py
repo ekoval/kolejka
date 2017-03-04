@@ -61,7 +61,7 @@ def set_zone_pair(zone_id):
         zone = Zone.objects.get(pk=zone_id)
         pair_zone = Zone.objects.get(pk=pair_zone_id)
     except DoesNotExist:
-        raise abort(404)
+        abort(404)
 
     zone.pair_zone_id = pair_zone.id
     zone.save()
