@@ -1,4 +1,4 @@
-from schema import Schema, And, Or, Optional, Use, Regex
+from schema import Schema, And, Or, Use, Regex
 
 tracking_base = {
     'tracking_id': And(
@@ -26,5 +26,4 @@ zone_schema = Schema({
     'lat': Or(int, float, error='lat should be either int or float'),
     'lon': Or(int, float, error='lon should be either int or float'),
     'radius': Or(int, error='radius should be int'),
-    Optional('pair_zone_id'): And(str),
 })
