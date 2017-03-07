@@ -41,10 +41,14 @@ class Zone(Document):
     lat = FloatField(required=True)
     lon = FloatField(required=True)
     radius = IntField(required=True)
+    pair_zone_id = ObjectIdField()
     enabled = BooleanField(default=True)
     created_at = DateTimeField(default=datetime.now)
 
     def as_dict(self):
         data = self.to_mongo()
         data['id'] = str(data.pop('_id'))
+        data['pair_zone_id'] = (
+            None if self.pair_zone_id is None else str(self.pair_zone_id))
+
         return data

@@ -25,5 +25,5 @@ zone_schema = Schema({
     'image': basestring,
     'lat': Or(int, float, error='lat should be either int or float'),
     'lon': Or(int, float, error='lon should be either int or float'),
-    'radius': Or(int, error='radius should be int')
+    'radius': Or(int, error='radius should be int'),
 })

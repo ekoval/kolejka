@@ -1,6 +1,6 @@
 import os
-from flask import Flask
-from flask_mongoengine import MongoEngine
+from flask import Flask, abort, request
+from flask_mongoengine import DoesNotExist, MongoEngine
 from helpers import api_response
 from models import Tracking, Zone
 from schemas import tracking_schema, bulk_tracking_schema, zone_schema
@@ -51,6 +51,24 @@ def get_zones():
 def post_zone(data):
     zone = Zone(**data).save()
     return zone.as_dict()
+
+
+@app.route('/v1/zones/<zone_id>/set-pair-zone', methods=['POST'])
+def set_zone_pair(zone_id):
+    pair_zone_id = request.json['pair_zone_id']
+
+    try:
+        zone = Zone.objects.get(pk=zone_id)
+        pair_zone = Zone.objects.get(pk=pair_zone_id)
+    except DoesNotExist:
+        abort(404)
+
+    zone.pair_zone_id = pair_zone.id
+    zone.save()
+
+    pair_zone.pair_zone_id = zone.id
+    pair_zone.save()
+    return 'Pair set: {} <-> {}'.format(zone.id, pair_zone.id)
 
 
 @app.route('/v1/zones/<id>', methods=['DELETE'])
