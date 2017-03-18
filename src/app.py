@@ -71,5 +71,15 @@ def get_tracking_data(tracking_id):
     return [point.as_dict() for point in data.order_by('tracking_timestamp')]
 
 
+@app.route('/v1/tracking-data/<tracking_id>', methods=['DELETE'])
+@api_response()
+def delete_tracking_data(tracking_id):
+    data = Tracking.objects.all()
+    if tracking_id != 'ALL':
+        data = data.filter(tracking_id=tracking_id)
+
+    data.delete()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
