@@ -318,3 +318,49 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
                     'tracking_id', 'lat', 'lon',
                     'created_at', 'tracking_timestamp'):
                 self.assertIn(key, point)
+
+
+class TestGetTrackingDataForAllIDs(unittest.TestCase):
+    def setUp(self):
+        app.debug = True
+        self.app = app.test_client()
+        _get_db().tracking.remove()
+        _get_db().zone.remove()
+
+        tracking_time = time.time()
+
+        self.points = [
+            Tracking.objects.create(
+                tracking_id='phone1',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
+                lat=10.1,
+                lon=10.2,
+                tracking_timestamp=tracking_time
+            ),
+
+            Tracking.objects.create(
+                tracking_id='phone1',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
+                lat=10.3,
+                lon=10.4,
+                tracking_timestamp=tracking_time+1
+            ),
+
+            Tracking.objects.create(
+                tracking_id='phone2',
+                zone_id=str(ObjectId()),
+                data_type=DataTypes.enter,
+                lat=10.5,
+                lon=10.6,
+                tracking_timestamp=tracking_time+2
+            )
+        ]
+
+        self.results = json.loads(self.app.get('/v1/tracking-data/ALL').data)
+
+    def test_returns_correct_data(self):
+        self.assertEqual(self.results['status'], 'success')
+        data = self.results['data']
+        self.assertEqual(len(data), 3)
