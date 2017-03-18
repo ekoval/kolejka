@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_mongoengine import MongoEngine
 from helpers import api_response
 from models import Tracking, Zone
@@ -9,7 +9,9 @@ from schemas import tracking_schema, bulk_tracking_schema, zone_schema
 MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/test')
 
 db = MongoEngine()
-app = Flask(__name__)
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+print tmpl_dir
+app = Flask(__name__, template_folder=tmpl_dir)
 app.config['MONGODB_SETTINGS'] = {
     'db': MONGODB_URI.split('/')[-1],
     'host': MONGODB_URI
@@ -79,6 +81,11 @@ def delete_tracking_data(tracking_id):
         data = data.filter(tracking_id=tracking_id)
 
     data.delete()
+
+
+@app.route('/ui/', methods=['GET'])
+def ui_index():
+    return render_template('ui.html')
 
 
 if __name__ == '__main__':
