@@ -364,3 +364,36 @@ class TestGetTrackingDataForAllIDs(unittest.TestCase):
         self.assertEqual(self.results['status'], 'success')
         data = self.results['data']
         self.assertEqual(len(data), 3)
+
+
+class TestDeleteTrackingDataForAllIDs(unittest.TestCase):
+    def setUp(self):
+        app.debug = True
+        self.app = app.test_client()
+        _get_db().tracking.remove()
+        _get_db().zone.remove()
+
+        tracking_time = time.time()
+
+        Tracking.objects.create(
+            tracking_id='phone1',
+            zone_id=str(ObjectId()),
+            data_type=DataTypes.enter,
+            lat=10.1,
+            lon=10.2,
+            tracking_timestamp=tracking_time
+        )
+
+        Tracking.objects.create(
+            tracking_id='phone2',
+            zone_id=str(ObjectId()),
+            data_type=DataTypes.enter,
+            lat=10.1,
+            lon=10.2,
+            tracking_timestamp=tracking_time
+        )
+        self.assertEqual(len(Tracking.objects.all()), 2)
+        self.result = self.app.delete('/v1/tracking-data/ALL')
+
+    def test_returns_correct_data(self):
+        self.assertEqual(len(Tracking.objects.all()), 0)

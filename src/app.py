@@ -73,7 +73,7 @@ def get_tracking_data(tracking_id):
 
 @app.route('/v1/tracking-data/<tracking_id>', methods=['DELETE'])
 @api_response()
-def get_tracking_data(tracking_id):
+def delete_tracking_data(tracking_id):
     data = Tracking.objects.all()
     if tracking_id != 'ALL':
         data = data.filter(tracking_id=tracking_id)
