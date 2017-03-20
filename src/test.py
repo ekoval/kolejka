@@ -4,7 +4,7 @@ import unittest
 from mongoengine.fields import ObjectId
 from mongoengine.connection import _get_db
 from app import app
-from models import Tracking
+from models import Tracking, Zone
 
 from constants import DataTypes
 
@@ -259,7 +259,7 @@ class KolejkaTest(unittest.TestCase):
         res = self.app.delete('/v1/zones/{id}'.format(id=zone['id']))
         self.assertEquals(res.status_code, 200)
 
-        res = self.app.get('/v1/zones')
+        res = self.app.get('/v1/zones?show_inactive=1')
         body = json.loads(res.data)
         self.assertEquals(body['data'][0]['enabled'], False)
 
@@ -405,3 +405,21 @@ class TestDeleteTrackingDataForAllIDs(unittest.TestCase):
 
     def test_returns_correct_data(self):
         self.assertEqual(len(Tracking.objects.all()), 0)
+
+
+class TestGetActiveZones(unittest.TestCase):
+    def setUp(self):
+        app.debug = True
+        self.app = app.test_client()
+        _get_db().tracking.remove()
+        _get_db().zone.remove()
+
+        self.zone = Zone.objects.create(
+            name='test', lat=10, lon=10, radius=10, enabled=False)
+        self.result = json.loads(self.app.get('/v1/zones').data)
+        self.assertEqual(len(self.result['data']), 0)
+
+    def test_inactive_zones_are_shown_if_flag_passed(self):
+        self.result = json.loads(
+            self.app.get('/v1/zones?show_inactive=True').data)
+        self.assertEqual(len(self.result['data']), 1)
