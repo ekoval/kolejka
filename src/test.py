@@ -286,7 +286,7 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
             Tracking.objects.create(
                 tracking_id='phone1',
                 zone_id=str(ObjectId()),
-                data_type=DataTypes.enter,
+                data_type=DataTypes.track,
                 lat=10.3,
                 lon=10.4,
                 tracking_timestamp=tracking_time+1
@@ -295,7 +295,7 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
             Tracking.objects.create(
                 tracking_id='phone2',
                 zone_id=str(ObjectId()),
-                data_type=DataTypes.enter,
+                data_type=DataTypes.track,
                 lat=10.5,
                 lon=10.6,
                 tracking_timestamp=tracking_time+2
@@ -304,6 +304,8 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
 
         self.results = json.loads(
             self.app.get('/v1/tracking-data/phone1').data)
+        self.results_filtered = json.loads(self.app.get(
+            '/v1/tracking-data/phone1?data_type=enter').data)
 
     def test_returns_correct_data(self):
         self.assertEqual(self.results['status'], 'success')
@@ -318,6 +320,12 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
                     'tracking_id', 'lat', 'lon',
                     'created_at', 'tracking_timestamp'):
                 self.assertIn(key, point)
+
+    def test_returns_correct_data_filtered_by_data_type(self):
+        self.assertEqual(self.results_filtered['status'], 'success')
+        data = self.results_filtered['data']
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['data_type'], DataTypes.enter)
 
 
 class TestGetTrackingDataForAllIDs(unittest.TestCase):

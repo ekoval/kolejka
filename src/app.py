@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_mongoengine import MongoEngine
 from helpers import api_response
 from models import Tracking, Zone
@@ -66,8 +66,10 @@ def delete_zone(id):
 def get_tracking_data(tracking_id):
     data = Tracking.objects.all()
     if tracking_id != 'ALL':
-        data = data.filter(
-            tracking_id=tracking_id)
+        data = data.filter(tracking_id=tracking_id)
+
+    if request.args.get('data_type'):
+        data = data.filter(data_type=request.args.get('data_type'))
     return [point.as_dict() for point in data.order_by('tracking_timestamp')]
 
 
