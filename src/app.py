@@ -43,7 +43,11 @@ def bulk_tracking(bulk_data):
 @app.route('/v1/zones', methods=['GET'])
 @api_response()
 def get_zones():
-    return [zone.as_dict() for zone in Zone.objects.all()]
+    if request.args.get('show_inactive'):
+        zones = Zone.objects.all()
+    else:
+        zones = Zone.objects.filter(enabled=True)
+    return [zone.as_dict() for zone in zones.order_by('created_at')]
 
 
 @app.route('/v1/zones', methods=['POST'])
