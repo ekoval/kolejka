@@ -4,7 +4,7 @@ import unittest
 from mongoengine.fields import ObjectId
 from mongoengine.connection import _get_db
 from app import app
-from models import Tracking
+from models import Tracking, Zone
 
 from constants import DataTypes
 
@@ -259,7 +259,7 @@ class KolejkaTest(unittest.TestCase):
         res = self.app.delete('/v1/zones/{id}'.format(id=zone['id']))
         self.assertEquals(res.status_code, 200)
 
-        res = self.app.get('/v1/zones')
+        res = self.app.get('/v1/zones?show_inactive=1')
         body = json.loads(res.data)
         self.assertEquals(body['data'][0]['enabled'], False)
 
@@ -286,7 +286,7 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
             Tracking.objects.create(
                 tracking_id='phone1',
                 zone_id=str(ObjectId()),
-                data_type=DataTypes.enter,
+                data_type=DataTypes.track,
                 lat=10.3,
                 lon=10.4,
                 tracking_timestamp=tracking_time+1
@@ -295,7 +295,7 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
             Tracking.objects.create(
                 tracking_id='phone2',
                 zone_id=str(ObjectId()),
-                data_type=DataTypes.enter,
+                data_type=DataTypes.track,
                 lat=10.5,
                 lon=10.6,
                 tracking_timestamp=tracking_time+2
@@ -304,6 +304,8 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
 
         self.results = json.loads(
             self.app.get('/v1/tracking-data/phone1').data)
+        self.results_filtered = json.loads(self.app.get(
+            '/v1/tracking-data/phone1?data_type=enter').data)
 
     def test_returns_correct_data(self):
         self.assertEqual(self.results['status'], 'success')
@@ -318,6 +320,12 @@ class TestGetTrackingDataForTrackingID(unittest.TestCase):
                     'tracking_id', 'lat', 'lon',
                     'created_at', 'tracking_timestamp'):
                 self.assertIn(key, point)
+
+    def test_returns_correct_data_filtered_by_data_type(self):
+        self.assertEqual(self.results_filtered['status'], 'success')
+        data = self.results_filtered['data']
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['data_type'], DataTypes.enter)
 
 
 class TestGetTrackingDataForAllIDs(unittest.TestCase):
@@ -397,3 +405,21 @@ class TestDeleteTrackingDataForAllIDs(unittest.TestCase):
 
     def test_returns_correct_data(self):
         self.assertEqual(len(Tracking.objects.all()), 0)
+
+
+class TestGetActiveZones(unittest.TestCase):
+    def setUp(self):
+        app.debug = True
+        self.app = app.test_client()
+        _get_db().tracking.remove()
+        _get_db().zone.remove()
+
+        self.zone = Zone.objects.create(
+            name='test', lat=10, lon=10, radius=10, enabled=False)
+        self.result = json.loads(self.app.get('/v1/zones').data)
+        self.assertEqual(len(self.result['data']), 0)
+
+    def test_inactive_zones_are_shown_if_flag_passed(self):
+        self.result = json.loads(
+            self.app.get('/v1/zones?show_inactive=True').data)
+        self.assertEqual(len(self.result['data']), 1)

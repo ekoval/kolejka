@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, request, render_template
 from flask_mongoengine import MongoEngine
 from helpers import api_response
 from models import Tracking, Zone
@@ -45,7 +45,11 @@ def bulk_tracking(bulk_data):
 @app.route('/v1/zones', methods=['GET'])
 @api_response()
 def get_zones():
-    return [zone.as_dict() for zone in Zone.objects.all()]
+    if request.args.get('show_inactive'):
+        zones = Zone.objects.all()
+    else:
+        zones = Zone.objects.filter(enabled=True)
+    return [zone.as_dict() for zone in zones.order_by('created_at')]
 
 
 @app.route('/v1/zones', methods=['POST'])
@@ -68,8 +72,10 @@ def delete_zone(id):
 def get_tracking_data(tracking_id):
     data = Tracking.objects.all()
     if tracking_id != 'ALL':
-        data = data.filter(
-            tracking_id=tracking_id)
+        data = data.filter(tracking_id=tracking_id)
+
+    if request.args.get('data_type'):
+        data = data.filter(data_type=request.args.get('data_type'))
     return [point.as_dict() for point in data.order_by('tracking_timestamp')]
 
 
