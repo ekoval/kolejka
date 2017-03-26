@@ -6,7 +6,7 @@ from mongoengine.connection import _get_db
 from app import app
 from models import Tracking, Zone
 
-from constants import DataTypes
+from constants import DataTypes, ZoneTypes
 
 
 class KolejkaTest(unittest.TestCase):
@@ -121,7 +121,10 @@ class KolejkaTest(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEquals(res.status_code, 400)
         self.assertEquals(body['status'], 'error')
-        self.assertEquals(body['data'], "data_type should be one of enter, leave, track")
+        self.assertEquals(
+            body['data'],
+            'possible data_type values are: enter, leave, track'
+        )
 
     def test_tracking_post(self):
         payload = {
@@ -217,13 +220,14 @@ class KolejkaTest(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEquals(
             body['data'],
-            "Missing keys: 'description', 'image', 'lat', 'lon', 'name', 'radius'"
+            "Missing keys: 'description', 'image', 'lat', 'lon', 'name', 'radius', 'zone_type'"
         )
 
     def test_add_delete_zone(self):
         payload = {
             'name': 'Grushiv',
             'description': 'Kolejka inodi',
+            'zone_type': ZoneTypes.control,
             'image': '',
             'lat': 10.5,
             'lon': 20,
@@ -232,6 +236,7 @@ class KolejkaTest(unittest.TestCase):
         res = self.app.post('/v1/zones',
                             data=json.dumps(payload),
                             content_type='application/json')
+        print res.data
         self.assertEquals(res.status_code, 200)
         body = json.loads(res.data)
 
@@ -415,7 +420,9 @@ class TestGetActiveZones(unittest.TestCase):
         _get_db().zone.remove()
 
         self.zone = Zone.objects.create(
-            name='test', lat=10, lon=10, radius=10, enabled=False)
+            name='test', zone_type=ZoneTypes.control, lat=10, lon=10,
+            radius=10, enabled=False
+        )
         self.result = json.loads(self.app.get('/v1/zones').data)
         self.assertEqual(len(self.result['data']), 0)
 
