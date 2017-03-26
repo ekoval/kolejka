@@ -3,7 +3,7 @@ from mongoengine import (
     BooleanField)
 from datetime import datetime
 
-from constants import DATA_TYPES
+from constants import DATA_TYPES, ZONE_TYPES
 
 
 class Tracking(Document):
@@ -37,6 +37,7 @@ class Tracking(Document):
 class Zone(Document):
     name = StringField(required=True)
     description = StringField()
+    zone_type = StringField(required=True, choices=ZONE_TYPES)
     image = StringField()
     lat = FloatField(required=True)
     lon = FloatField(required=True)

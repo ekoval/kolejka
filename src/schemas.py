@@ -5,8 +5,9 @@ tracking_base = {
         basestring, len, error='tracking_id should be non-empty string'),
     'zone_id': And(
         basestring, len, error='zone_id should be non-empty string'),
-    'data_type': Regex('(enter|leave|track)',
-        error='data_type should be one of enter, leave, track'),
+    'data_type': Regex(
+        '(enter|leave|track)',
+        error='data_type should be one of control/checkpoint'),
     'tracking_timestamp': Use(
         int, error='tracking_timestamp should be integer'),
     'lat': Or(int, float, error='lat should be either int or float'),
@@ -22,6 +23,7 @@ bulk_tracking_schema = Schema({
 zone_schema = Schema({
     'name': And(basestring, len, error='name should be non-empty string'),
     'description': And(unicode, len, error='name should be non-empty string'),
+    'zone_type': Regex('(control|checkpoint)'),
     'image': basestring,
     'lat': Or(int, float, error='lat should be either int or float'),
     'lon': Or(int, float, error='lon should be either int or float'),
