@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      #map_canvas {
+        width: 700px;
+        height: 600px;
+        border: 1px solid #ccc;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+  </head>
+  <body>
+    <div id="map_canvas"></div>
+    <script>
+      function initialize() {
+        var mapCanvas = document.getElementById('map_canvas');
+        var mapOptions = {
+          center: new google.maps.LatLng(49.8350957, 24.0206744),
+          zoom: 13,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(mapCanvas, mapOptions);
+        var colors = ['#FF0000', '#00FF00', '#0000FF', '#999900', '#009999', '#990099'];
+
+        $.get('/v1/tracking-data/ALL').done(function(data) {
+          var path = new google.maps.Polyline({
+            path: $.map(data.data, function(x) {
+              console.log(x);
+              return new google.maps.LatLng(x.lat, x.lon);
+            }),
+            geodesic: true,
+            strokeColor: '#000099',
+            strokeOpacity: 0.3,
+            strokeWeight: 4
+          });
+
+          path.setMap(map);
+        });
+      }
+      $(document).ready(initialize);
+    </script>
+  </body>
+</html>
