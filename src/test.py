@@ -236,7 +236,7 @@ class KolejkaTest(unittest.TestCase):
         res = self.app.post('/v1/zones',
                             data=json.dumps(payload),
                             content_type='application/json')
-        print res.data
+
         self.assertEquals(res.status_code, 200)
         body = json.loads(res.data)
 
@@ -430,3 +430,21 @@ class TestGetActiveZones(unittest.TestCase):
         self.result = json.loads(
             self.app.get('/v1/zones?show_inactive=True').data)
         self.assertEqual(len(self.result['data']), 1)
+
+
+class TestCanCreateZoneWithoutOptionalFields(unittest.TestCase):
+    def setUp(self):
+        payload = {
+            'name': 'test',
+            'zone_type': ZoneTypes.control,
+            'lat': 10.5,
+            'lon': 20,
+            'radius': 3000
+        }
+        self.result = app.test_client().post(
+            '/v1/zones', data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+    def test_zone_is_created(self):
+        self.assertEquals(self.result.status_code, 200)
