@@ -220,7 +220,7 @@ class KolejkaTest(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEquals(
             body['data'],
-            "Missing keys: 'description', 'image', 'lat', 'lon', 'name', 'radius', 'zone_type'"
+            "Missing keys: 'lat', 'lon', 'name', 'radius', 'zone_type'"
         )
 
     def test_add_delete_zone(self):
@@ -228,7 +228,7 @@ class KolejkaTest(unittest.TestCase):
             'name': 'Grushiv',
             'description': 'Kolejka inodi',
             'zone_type': ZoneTypes.control,
-            'image': '',
+            'image': 'img1.jpg',
             'lat': 10.5,
             'lon': 20,
             'radius': 3000
@@ -242,7 +242,7 @@ class KolejkaTest(unittest.TestCase):
 
         self.assertEquals(body['data']['name'], 'Grushiv')
         self.assertEquals(body['data']['description'], 'Kolejka inodi')
-        self.assertEquals(body['data']['image'], '')
+        self.assertEquals(body['data']['image'], 'img1.jpg')
         self.assertEquals(body['data']['lat'], 10.5)
         self.assertEquals(body['data']['lon'], 20)
         self.assertEquals(body['data']['radius'], 3000)
@@ -255,7 +255,7 @@ class KolejkaTest(unittest.TestCase):
         zone = body['data'][0]
         self.assertEquals(zone['name'], 'Grushiv')
         self.assertEquals(zone['description'], 'Kolejka inodi')
-        self.assertEquals(zone['image'], '')
+        self.assertEquals(zone['image'], 'img1.jpg')
         self.assertEquals(zone['lat'], 10.5)
         self.assertEquals(zone['lon'], 20)
         self.assertEquals(zone['radius'], 3000)
