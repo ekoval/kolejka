@@ -1,4 +1,4 @@
-from schema import Schema, And, Or, Use, Regex
+from schema import Schema, And, Optional, Or, Use, Regex
 
 tracking_base = {
     'tracking_id': And(
@@ -22,11 +22,11 @@ bulk_tracking_schema = Schema({
 
 zone_schema = Schema({
     'name': And(basestring, len, error='name should be non-empty string'),
-    'description': And(unicode, len, error='name should be non-empty string'),
+    Optional('description'): And(basestring, len),
     'zone_type': Regex(
         '(control|checkpoint)',
         error='possible zone_type values are: control, checkpoint'),
-    'image': basestring,
+    Optional('image'): And(basestring, len),
     'lat': Or(int, float, error='lat should be either int or float'),
     'lon': Or(int, float, error='lon should be either int or float'),
     'radius': Or(int, error='radius should be int')
