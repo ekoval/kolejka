@@ -30,7 +30,7 @@ class Tracking(Document):
             'tracking_id': self.tracking_id,
             'data_type': self.data_type,
             'zone_id': str(self.zone_id),
-#            'zone_name': zones_dict.get(str(self.zone_id), str(self.zone_id)),
+            'zone_name': zones_dict.get(str(self.zone_id), str(self.zone_id)),
             'tracking_timestamp': self.tracking_timestamp,
  #           'tracking_time': str(datetime.fromtimestamp(self.tracking_timestamp)),
             'created_at': str(self.created_at),
