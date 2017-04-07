@@ -22,17 +22,17 @@ class Tracking(Document):
     }
 
     def as_dict(self):
-        zones_dict = {
-            str(z.id): z.name for z in Zone.objects.filter(enabled=True)}
+        #~ zones_dict = {
+            #~ str(z.id): z.name for z in Zone.objects.filter(enabled=True)}
 
         return {
             'id': str(self.id),
             'tracking_id': self.tracking_id,
             'data_type': self.data_type,
             'zone_id': str(self.zone_id),
-            'zone_name': zones_dict.get(str(self.zone_id), str(self.zone_id)),
+#            'zone_name': zones_dict.get(str(self.zone_id), str(self.zone_id)),
             'tracking_timestamp': self.tracking_timestamp,
-            'tracking_time': str(datetime.fromtimestamp(self.tracking_timestamp)),
+ #           'tracking_time': str(datetime.fromtimestamp(self.tracking_timestamp)),
             'created_at': str(self.created_at),
             'lon': self.lon,
             'lat': self.lat
