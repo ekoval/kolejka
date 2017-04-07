@@ -32,7 +32,7 @@ class Tracking(Document):
             'zone_id': str(self.zone_id),
             'zone_name': zones_dict.get(str(self.zone_id), str(self.zone_id)),
             'tracking_timestamp': self.tracking_timestamp,
-            'tracking_time': datetime.fromtimestamp(self.tracking_timestamp),
+            'tracking_time': str(datetime.fromtimestamp(self.tracking_timestamp)),
             'created_at': self.created_at,
             'lon': self.lon,
             'lat': self.lat
