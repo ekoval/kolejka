@@ -74,6 +74,7 @@ def get_tracking_data(tracking_id):
 
     if request.args.get('data_type'):
         data = data.filter(data_type=request.args.get('data_type'))
+
     return [point.as_dict() for point in data.order_by('tracking_timestamp')]
 
 
