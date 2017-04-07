@@ -22,8 +22,8 @@ class Tracking(Document):
     }
 
     def as_dict(self):
-        #~ zones_dict = {
-            #~ str(z.id): z.name for z in Zone.objects.filter(enabled=True)}
+        zones_dict = {
+            str(z.id): z.name for z in Zone.objects.filter(enabled=True)}
 
         return {
             'id': str(self.id),
