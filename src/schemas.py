@@ -26,7 +26,7 @@ zone_schema = Schema({
     'zone_type': Regex(
         '(control|checkpoint)',
         error='possible zone_type values are: control, checkpoint'),
-    Optional('image'): And(basestring, len),
+    Optional('image'): And(basestring),
     'lat': Or(int, float, error='lat should be either int or float'),
     'lon': Or(int, float, error='lon should be either int or float'),
     'radius': Or(int, error='radius should be int')

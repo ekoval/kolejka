@@ -220,7 +220,7 @@ class KolejkaTest(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEquals(
             body['data'],
-            "Missing keys: 'description', 'image', 'lat', 'lon', 'name', 'radius', 'zone_type'"
+            "Missing keys: 'lat', 'lon', 'name', 'radius', 'zone_type'"
         )
 
     def test_add_delete_zone(self):
